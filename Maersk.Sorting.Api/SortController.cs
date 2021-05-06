@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Maersk.Sorting.Api.Services;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
 
@@ -9,10 +10,12 @@ namespace Maersk.Sorting.Api.Controllers
     public class SortController : ControllerBase
     {
         private readonly ISortJobProcessor _sortJobProcessor;
+        private readonly IRepoService repoService;
 
-        public SortController(ISortJobProcessor sortJobProcessor)
+        public SortController(ISortJobProcessor sortJobProcessor, IRepoService repoService)
         {
             _sortJobProcessor = sortJobProcessor;
+            this.repoService = repoService;
         }
 
         [HttpPost("run")]
@@ -32,24 +35,45 @@ namespace Maersk.Sorting.Api.Controllers
         }
 
         [HttpPost]
-        public Task<ActionResult<SortJob>> EnqueueJob(int[] values)
+        public async Task<ActionResult<SortJob>> EnqueueJob([FromBody]int[] values)
         {
-            // TODO: Should enqueue a job to be processed in the background.
-            throw new NotImplementedException();
+            if (values == null) return BadRequest();
+
+            var pendingJob = new SortJob(
+                id: Guid.NewGuid(),
+                status: SortJobStatus.Pending,
+                duration: null,
+                input: values,
+                output: null);
+            var result = await repoService.EnqueueJobAsync("Jobs", pendingJob);
+            if (result)
+            {
+                return Ok();
+            }
+            return StatusCode(500, "Unable to schedule the job, please try again after sometime");
         }
 
         [HttpGet]
-        public Task<ActionResult<SortJob[]>> GetJobs()
+        public async Task<ActionResult<SortJob[]>> GetJobs()
         {
             // TODO: Should return all jobs that have been enqueued (both pending and completed).
-            throw new NotImplementedException();
+            var result = await repoService.GetAllJobsAsync("Jobs");
+            return Ok(result);
         }
 
         [HttpGet("{jobId}")]
-        public Task<ActionResult<SortJob>> GetJob(Guid jobId)
+        public async Task<ActionResult<SortJob>> GetJob(Guid jobId)
         {
-            // TODO: Should return a specific job by ID.
-            throw new NotImplementedException();
+            if (jobId==null)
+            {
+                return BadRequest();
+            }
+            var result = await repoService.GetJobByIdAsync("Jobs", jobId);
+            if (result!=null)
+            {
+                return Ok(result);
+            }
+            return NotFound($"The Job with Job Id: {jobId} is not found");
         }
     }
 }
