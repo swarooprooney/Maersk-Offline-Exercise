@@ -1,4 +1,6 @@
-﻿using MongoDB.Bson;
+﻿using Maersk.Sorting.Api.Configuration;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -10,10 +12,12 @@ namespace Maersk.Sorting.Api.DataLayer
     public class MongoWrapper : IDatabaseWrapper
     {
         private readonly IMongoDatabase db;
-        public MongoWrapper(string connectionString, string database)
+        private readonly DBConfiguration _options;
+        public MongoWrapper(IOptionsMonitor<DBConfiguration> dbConfig)
         {
-            var mongoClient = new MongoClient(connectionString);
-            db = mongoClient.GetDatabase(database);
+            _options = dbConfig.CurrentValue;
+            var mongoClient = new MongoClient(_options.ConnectionString);
+            db = mongoClient.GetDatabase(_options.JobDatabase);
         }
 
         public async Task<bool> TryInsertNewRecordAsync<T>(string table, T record)
@@ -40,6 +44,14 @@ namespace Maersk.Sorting.Api.DataLayer
             var filter = Builders<T>.Filter.Eq("Id", guid);
             var result = await collection.Find(filter).FirstOrDefaultAsync();
             return result;
+        }
+
+        public async Task<bool> UpdateRecord<T>(string table,Guid guid,T record)
+        {
+            var collection = db.GetCollection<T>(table);
+            var filter = Builders<T>.Filter.Eq("Id", guid);
+            var result = await collection.ReplaceOneAsync(filter,record);
+            return result.ModifiedCount > 0 ? true : false;
         }
     }
 }

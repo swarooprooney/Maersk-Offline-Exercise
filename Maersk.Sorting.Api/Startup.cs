@@ -1,3 +1,7 @@
+using Maersk.Sorting.Api.Configuration;
+using Maersk.Sorting.Api.DataLayer;
+using Maersk.Sorting.Api.Extensions;
+using Maersk.Sorting.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -21,8 +25,7 @@ namespace Maersk.Sorting.Api
             services
                 .AddControllers()
                 .AddNewtonsoftJson(options => options.SerializerSettings.Converters.Add(new StringEnumConverter()));
-
-            services.AddSingleton<ISortJobProcessor, SortJobProcessor>();
+            services.AddApplicationServices(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

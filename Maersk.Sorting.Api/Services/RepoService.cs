@@ -29,5 +29,10 @@ namespace Maersk.Sorting.Api.Services
         {
             return await databaseWrapper.GetRecordByIdAsync<SortJob>(table,id);
         }
+
+        public async Task<bool> UpdateJobAsync(string table, SortJob sortJob)
+        {
+            return await databaseWrapper.UpdateRecord(table, sortJob.Id, sortJob);
+        }
     }
 }

@@ -1,4 +1,6 @@
+using Maersk.Sorting.Api.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Maersk.Sorting.Api
@@ -15,6 +17,10 @@ namespace Maersk.Sorting.Api
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                })
+            .ConfigureServices(Services =>
+                {
+                    Services.AddHostedService<BackgroundJobService>();
                 });
     }
 }

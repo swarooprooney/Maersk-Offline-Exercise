@@ -8,7 +8,7 @@ namespace Maersk.Sorting.Api.Services
     {
         Task<bool> EnqueueJobAsync(string table, SortJob sortJob);
         Task<List<SortJob>> GetAllJobsAsync(string table);
-
         Task<SortJob> GetJobByIdAsync(string table,Guid id);
+        Task<bool> UpdateJobAsync(string table,SortJob sortJob);
     }
 }

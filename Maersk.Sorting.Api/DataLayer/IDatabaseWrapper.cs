@@ -9,5 +9,6 @@ namespace Maersk.Sorting.Api.DataLayer
         Task<List<T>> GetAllRecordsAsync<T>(string table);
         Task<T> GetRecordByIdAsync<T>(string table, Guid guid);
         Task<bool> TryInsertNewRecordAsync<T>(string table, T record);
+        Task<bool> UpdateRecord<T>(string table, Guid guid, T record);
     }
 }
